@@ -42,6 +42,12 @@ listint_t *insert_node(listint_t **head, int number)
 		tmp = traverse;
 		traverse = traverse->next;
 	}
+	if (!traverse->next)
+	{
+		node->next = traverse->next;
+		traverse->next = node;
+		return (node);
+	}
 	node->next = traverse;
 	tmp->next = node;
 	return (node);
