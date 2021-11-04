@@ -12,7 +12,7 @@ skiplist_t *linear_skip(skiplist_t *list, int value)
 	skiplist_t *curr;
 	skiplist_t *prev;
 	char *finder = "Value checked at index";
-	char *found = "Value found between index";
+	char *found = "Value found between indexes";
 
 	if (!list)
 		return (NULL);
