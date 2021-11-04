@@ -36,7 +36,7 @@ skiplist_t *linear_skip(skiplist_t *list, int value)
 	printf("%s [%lu] and [%lu]\n", found, prev->index, curr->index);
 	while (prev && prev->index <= curr->index)
 	{
-		printf("%s [%lu] = [%d]\n", finder, curr->index, curr->n);
+		printf("%s [%lu] = [%d]\n", finder, prev->index, prev->n);
 		if (prev->n == value)
 			return (prev);
 		prev = prev->next;
