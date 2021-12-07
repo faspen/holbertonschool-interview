@@ -5,53 +5,35 @@
 import requests
 
 
-def get_posts(subreddit, word_list, word_dict, sub_dict, after="", count=0):
-    """Retrieve posts"""
-    url = "https://www.reddit.com/r/{}/hot/.json".format(subreddit)
-    h = {"User-Agent": "faspen01"}
-    p = {"after": after, "count": count, "limit": 100}
+def count_words(subreddit, word_list, num={}, after=""):
+    """Queries the Reddit API and sorts articles"""
+    if len(num) <= 0:
+        for obj in word_list:
+            num[obj] = 0
+    if after is None:
+        word_list = [[k, v] for k, v in num.items()]
+        word_list = sorted(word_list, key=lambda x: (-x[1], x[0]))
 
+        for i in word_list:
+            if i[1]:
+                print("{}: {}".format(i[0].lower(), i[1]))
+        return None
+
+    url = "https://api.reddit.com/r/{}/hot".format(subreddit)
+    p = {'limit': 100, 'after': after}
+    h = {'user-agent': 'my-app/0.0.1'}
     response = requests.get(url, headers=h, params=p, allow_redirects=False)
 
-    try:
-        posts = response.json()
-        if (response.status_code > 300):
-            raise BaseException
-    except BaseException:
-        return
+    if response.status_code == 200:
+        after = response.json().get("data").get("after")
+        children = response.json().get("data").get("children")
 
-    posts = posts.get("data")
-    after = posts.get("after")
-    count += posts.get("dist")
-    for c in posts.get("children"):
-        title = c.get("data").get("title").lower().split()
-        for w in word_list:
-            if (w.lower() in title):
-                t = len([t for t in title if t == w.lower()])
-                inst = word_dict.get(w)
-                word_dict[w] = t if inst is None else word_dict[w] + t
+        for c in children:
+            title = c.get("data").get("title")
+            low = [x.lower() for x in title.split(' ')]
 
-    if after is None:
-        if len(word_dict) == 0:
-            print("")
-            return
-        tmp = []
-
-        for item, val in word_dict.items():
-            tmp.append((val, item))
-        tmp.sort(reverse=True)
-
-        for t in tmp:
-            item, val = t[0], t[1]
-            print("{}: {}".format(val, item))
+            for w in word_list:
+                num[w] += low.count(w.lower())
     else:
-        get_posts(subreddit, word_list, word_dict, after, count)
-
-
-def count_words(subreddit, word_list):
-    """Queries the Reddit API and sorts articles"""
-    word_dict = {}
-    after = ""
-    count = 0
-
-    return get_posts(subreddit, word_list, word_dict, after, count)
+        return None
+    count_words(subreddit, word_list, num, after)
